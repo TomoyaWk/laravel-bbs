@@ -1,0 +1,86 @@
+name: Laravel Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: laravel_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, dom, fileinfo, mysql
+        coverage: xdebug
+
+    - uses: actions/checkout@v3
+
+    - name: Copy .env
+      run: |
+        cd backend
+        cp .env.example .env
+        touch database/database.sqlite
+
+    - name: Install Composer dependencies
+      run: |
+        cd backend
+        composer install --no-progress --prefer-dist --optimize-autoloader
+
+    - name: Generate key
+      run: |
+        cd backend
+        php artisan key:generate
+
+    - name: Directory Permissions
+      run: |
+        cd backend
+        chmod -R 777 storage bootstrap/cache
+
+    - name: Create Database
+      run: |
+        cd backend
+        php artisan migrate --seed
+        
+    # JWTトークン用のシークレットキーを生成 (.envにJWT_SECRETがない場合に必要)
+    - name: Generate JWT Secret
+      run: |
+        cd backend
+        php artisan jwt:secret
+
+    - name: Run Tests
+      run: |
+        cd backend
+        php artisan test
+        
+    # カバレッジレポートが必要な場合はコメントを外してください
+    # - name: Run Tests with Coverage
+    #   run: |
+    #     cd backend
+    #     php artisan test --coverage
+    #   env:
+    #     XDEBUG_MODE: coverage
+
+    # 追加のLaravelチェックを行うことも可能です
+    - name: Static Analysis (if available)
+      run: |
+        cd backend
+        if [ -f vendor/bin/phpstan ]; then
+          vendor/bin/phpstan analyse
+        else
+          echo "PHPStan not installed. Skipping static analysis."
+        fi
+      continue-on-error: true

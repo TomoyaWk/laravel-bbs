@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "9000:9000" # PHP-FPM port
+    depends_on:
+      - db
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel_bbs
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      # JWT Secret will be generated later
+
+  nginx:
+    image: nginx:alpine
+    container_name: laravel_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: laravel_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: laravel_bbs
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "33066:3306" # Host port:Container port
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

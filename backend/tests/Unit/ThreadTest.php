@@ -6,17 +6,23 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Thread;
 use App\Models\User;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\ThreadSeeder;
 
 use function PHPUnit\Framework\assertEquals;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ThreadTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(); // testData豆乳
+        
+        // シードを順番に実行（UserSeederを先に実行）
+        $this->seed(UserSeeder::class);
+        $this->seed(ThreadSeeder::class);
     }
 
     /**
@@ -94,6 +100,7 @@ class ThreadTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $loginResponse->json('token'),
         ])->getJson('/api/threads/1');
+
         $response->assertStatus(200)->assertJsonStructure([
             'id',
             'title',
@@ -124,11 +131,11 @@ class ThreadTest extends TestCase
             $response->json('view_count')
         );
         assertEquals(
-            $expected->created_at,
+            $expected->created_at->toJSON(),
             $response->json('created_at')
         );
         assertEquals(
-            $expected->updated_at,
+            $expected->updated_at->toJSON(),
             $response->json('updated_at')
         );
     }

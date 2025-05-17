@@ -14,25 +14,32 @@ class ThreadSeeder extends Seeder
     public function run(): void
     {
         $users = User::all();
+        
+        if ($users->isEmpty()) {
+            $this->call(UserSeeder::class);
+            $users = User::all();
+        }
+
+        $userId = $users->first()->id;
 
         // サンプルスレッドを作成
         Thread::create([
             'title' => '掲示板システムの使い方',
-            'user_id' => 1, // 管理者が作成
+            'user_id' => $userId, // 管理者が作成
             'view_count' => 100,
             'is_locked' => false,
         ]);
         
         Thread::create([
             'title' => '自己紹介スレッド',
-            'user_id' => 2, // テストユーザー1が作成
+            'user_id' => $userId, // テストユーザー1が作成
             'view_count' => 50,
             'is_locked' => false,
         ]);
         
         Thread::create([
             'title' => 'お知らせ（ロック済み）',
-            'user_id' => 1, // 管理者が作成
+            'user_id' => $userId, // 管理者が作成
             'view_count' => 80,
             'is_locked' => true,
         ]);

@@ -65,6 +65,11 @@ class ThreadController extends Controller
         if (!$thread) {
             return response()->json(['error' => 'Thread not found'], 404);
         }
+        //作成者のみ更新可能
+        if ($thread->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    
         $thread->update($request->all());
         return response()->json($thread);
     }
@@ -80,6 +85,10 @@ class ThreadController extends Controller
         $thread = Thread::find($id);
         if (!$thread) {
             return response()->json(['error' => 'Thread not found'], 404);
+        }
+        //作成者のみ削除可能
+        if ($thread->user_id !== $request->user()->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
         $thread->delete();
         return response()->json(null, 204);

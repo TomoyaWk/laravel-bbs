@@ -20,7 +20,9 @@ class ThreadSeeder extends Seeder
             $users = User::all();
         }
 
-        $userId = $users->first()->id;
+        $userId = $users->where('email', 'user1@example.com')
+        ->first()
+        ->id;
 
         // サンプルスレッドを作成
         Thread::create([

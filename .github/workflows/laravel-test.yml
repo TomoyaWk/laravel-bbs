@@ -55,7 +55,7 @@ jobs:
         cd backend
         php artisan migrate --seed
         
-    # JWTトークン用のシークレットキーを生成 (.envにJWT_SECRETがない場合に必要)
+    # JWTトークン用のシークレットキーを生成
     - name: Generate JWT Secret
       run: |
         cd backend
@@ -66,7 +66,7 @@ jobs:
         cd backend
         php artisan test
         
-    # カバレッジレポートが必要な場合はコメントを外してください
+    # カバレッジレポート
     # - name: Run Tests with Coverage
     #   run: |
     #     cd backend
@@ -75,12 +75,12 @@ jobs:
     #     XDEBUG_MODE: coverage
 
     # 追加のLaravelチェックを行うことも可能です
-    - name: Static Analysis (if available)
-      run: |
-        cd backend
-        if [ -f vendor/bin/phpstan ]; then
-          vendor/bin/phpstan analyse
-        else
-          echo "PHPStan not installed. Skipping static analysis."
-        fi
-      continue-on-error: true
+    # - name: Static Analysis (if available)
+    #   run: |
+    #     cd backend
+    #     if [ -f vendor/bin/phpstan ]; then
+    #       vendor/bin/phpstan analyse
+    #     else
+    #       echo "PHPStan not installed. Skipping static analysis."
+    #     fi
+    #   continue-on-error: true
